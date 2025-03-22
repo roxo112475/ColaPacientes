@@ -4,12 +4,12 @@ class Paciente:
         self.IDPac = IDPac
         self.consulta = consulta
         self.urgencia = urgencia
-        self.tiempos = self.tiempos = tiempos if isinstance(tiempos, dict) else {
+        self.tiempos = tiempos if isinstance(tiempos, dict) else {
         "tEstimado": None, "tLlegada": None, "tEntrada": None,
         "tInicio_consulta": None, "tFinal_consulta": None, "tTotal": None
     }
 #Propiedades: 
-    
+
     @property
     def IDPac(self):
         return self._IDPac
