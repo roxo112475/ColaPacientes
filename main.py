@@ -2,7 +2,7 @@
 
 import sys
 import Gestor
-import clase_paciente as paciente
+import clase_paciente as Paciente
 from Colas import Cola
 # Funciones
 
