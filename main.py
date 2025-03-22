@@ -1,8 +1,8 @@
 # Clases / Librerías
 
 import sys
-import Gestor
-import clase_paciente as Paciente
+from Gestor import Gestor_Turnos
+from clase_paciente import Paciente
 from Colas import Cola
 # Funciones
 
@@ -24,14 +24,16 @@ def cargar_paciente(cola: Cola) :
             consulta = datos_paciente[1]
             urgencia = datos_paciente[2].lower() == "true"
             tEstimado = int(datos_paciente[3])
-            if not any( admitidos.IDPac() == IDPac for admitidos in cola.Admision()):
-                paciente = Paciente(IDPac, consulta, urgencia, tEstimado)
-                cola.Admision().enqueue(paciente)            
-                return
+            
+            paciente = Paciente(IDPac, consulta, urgencia)
+            paciente.tiempos['tEstimado'] = tEstimado
+            cola.enqueue(paciente)            
+            return
 
 # Código main()
 
-if '__main__' == '__name__' :
-    Gestor.Admision() = cargar_paciente()
-    print(Gestor.Admision())
+if __name__ == '__main__' :
+    admision = Gestor_Turnos.Admision
+    cargar_paciente(admision)
+    print(admision)
     

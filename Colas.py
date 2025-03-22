@@ -69,4 +69,4 @@ class Cola:
         for i in range(self._front, self._size):
             s += "\t" + self._data[i].__str__() + "\n"
         s += "]\n"
-        return s
+        return 
