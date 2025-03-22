@@ -3,7 +3,7 @@
 import sys
 import Gestor
 import clase_paciente as paciente
-import Cola from Colas
+from Colas import Cola
 # Funciones
 
 def cargar_paciente(cola: Cola) : 
@@ -31,7 +31,7 @@ def cargar_paciente(cola: Cola) :
 
 # Código main()
 
-if __main__ == '__name__' :
+if '__main__' == '__name__' :
     Gestor.Admision() = cargar_paciente()
     print(Gestor.Admision())
     
