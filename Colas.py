@@ -70,9 +70,3 @@ class Cola:
             s += "\t" + self._data[i].__str__() + "\n"
         s += "]\n"
         return s
-    
-    def __iter__(self):
-        for i in range(self._size):
-            yield self._data[(self._front + i) % len(self._data)]
-
-            

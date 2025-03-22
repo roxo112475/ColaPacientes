@@ -4,8 +4,7 @@ class Paciente:
         self.IDPac = IDPac
         self.consulta = consulta
         self.urgencia = urgencia
-        self.tEstimado = tEstimado
-        self.tiempos = {"tEstimado": tEstimado, "tLlegada": None, "tEntrada": None, "tInicio_consulta": None, "tFinal_consulta": None, "tTotal": None }
+        self.tiempos = {"tEstimado": None, "tLlegada": None, "tEntrada": None, "tInicio_consulta": None, "tFinal_consulta": None, "tTotal": None }
 #Propiedades: 
 
     @property
@@ -20,8 +19,8 @@ class Paciente:
     def urgencia(self):
         return self._urgencia
     @property
-    def tEstimado(self):
-        return self._tEstimado
+    def tiempos(self):
+        return self._tiempos
     
     
     #Setters
@@ -49,12 +48,25 @@ class Paciente:
             raise TypeError("La variable tiene que ser de tipo booleano ")
                   
               
-    @tEstimado.setter
-    def tEstimado(self, value):
-        if isinstance(value, int) and value > 0:
-            self._tEstimado = value 
-        else:
-            raise ValueError("El tiempo estimado tiene que tener un entero positivo")
+    @tiempos.setter
+    def tiempos(self, value):
+        for i in self._tiempos :
+            if isinstance(value[i], int) and value[i] > 0:
+                self._tiempos = value[i] 
+            else :
+                raise ValueError("El tiempo estimado tiene que tener un entero positivo")
+        
+        if value['tFinalConsulta'] < value['tInicioConsulta'] < value['tLlegada'] :
+            raise ValueError('La cronología de accesos no es lineal.')
+        
+        if value['tFinalConsulta'] - value['tInicioConsulta'] > value['tEstimado'] :
+            raise ValueError('El tiempo de consulta ha superado al estimado.')
+        
+        if value['tTotal'] != value['tFinalConsulta'] - value['tLlegada'] :
+            raise ValueError('El tiempo total no representa el tiempo real del paciente en espera y consulta.')
+        
+        if value['tEntrada'] < value['tLlegada'] :
+            raise ValueError('El tiempo de entrada a la cola no puede ser menor al de llegada a admisión.')
         
     def __str__(self):
         return f"ID: {self.IDPac}, Tipo de Consulta: {self.consulta}, Urgencia: {self.urgencia}, Tiempo Estimado: {self.tEstimado}"
