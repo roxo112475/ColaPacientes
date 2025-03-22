@@ -1,13 +1,11 @@
 
 class Paciente:
-    def __init__(self, IDPac: int, consulta: str, urgencia: bool, tiempos = None):
+    def __init__(self, IDPac: int, consulta: str, urgencia: bool, tEstimado: int):
         self.IDPac = IDPac
         self.consulta = consulta
         self.urgencia = urgencia
-        self.tiempos = tiempos if isinstance(tiempos, dict) else {
-        "tEstimado": None, "tLlegada": None, "tEntrada": None,
-        "tInicio_consulta": None, "tFinal_consulta": None, "tTotal": None
-    }
+        self.tEstimado = tEstimado
+        self.tiempos = {"tEstimado": tEstimado, "tLlegada": -1, "tEntrada": -1, "tInicio_consulta": -1, "tFinal_consulta": -1, "tTotal": -1 }
 #Propiedades: 
 
     @property
@@ -22,8 +20,8 @@ class Paciente:
     def urgencia(self):
         return self._urgencia
     @property
-    def tiempos(self):
-        return self._tiempos
+    def tEstimado(self):
+        return self._tEstimado
     
     
     #Setters
@@ -51,15 +49,17 @@ class Paciente:
             raise TypeError("La variable tiene que ser de tipo booleano ")
                   
               
-    @tiempos.setter
-    def tiempos(self, value):
-
-        for i in value :
-            if isinstance(value[i], int) and value[i] > 0 or value[i] is None :
-                self._tiempos = value[i] 
-            else :
-                raise ValueError("El tiempo estimado tiene que tener un entero positivo")
+    @tEstimado.setter
+    def tEstimado(self, value):
+        if isinstance(value, int) and value > 0:
+            self._tEstimado = value 
+        else:
+            raise ValueError("El tiempo estimado tiene que tener un entero positivo")
         
     def __str__(self):
-        return f"ID: {self.IDPac}, Tipo de Consulta: {self.consulta}, Urgencia: {self.urgencia}, Tiempo Estimado: {self.tiempos['tEstimado']}"
+        return f"ID: {self.IDPac}, Tipo de Consulta: {self.consulta}, Urgencia: {self.urgencia}, Tiempo Estimado: {self.tEstimado}"
     
+
+
+#paciente1 = Paciente("001", "General", False, 7)
+#paciente1.tiempos

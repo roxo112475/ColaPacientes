@@ -63,10 +63,29 @@ class Cola:
             self._data[k] = old[walk]  # intentionally shift indices
             walk = (1 + walk) % len(old)  # use old size as modulus
         self._front = 0  # front has been realigned
+        
+    def clear(self):
+        self._data = [None] * Cola.DEFAULT_CAPACITY
+        self._size = 0
+        self._front = 0
+
 
     def __str__(self):
         s = "[\n"
         for i in range(self._front, self._size):
             s += "\t" + self._data[i].__str__() + "\n"
         s += "]\n"
-        return 
+        return s
+    
+    def __iter__(self):
+        for i in range(self._size):
+            yield self._data[(self._front + i) % len(self._data)]
+            
+            
+
+GeneralUrgente = Cola()
+GeneralNoUrgente = Cola()
+EspecificoUrgente = Cola()
+EspecificoNoUrgente = Cola()
+Admision = Cola()
+   
