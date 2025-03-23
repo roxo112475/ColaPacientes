@@ -18,8 +18,11 @@ class Gestor_Turnos:
             self._tActual = value
         else:
             raise ValueError("El tiempo actual tiene que ser un número entero positivo")
+    
+    @property
+    def lista_prioridad(self):
+        return self._lista_prioridad
 
-                
                 
 #Consultas:
     G_Urgente = []
@@ -64,7 +67,7 @@ class Gestor_Turnos:
             paciente = Admision.dequeue()
             paciente.tiempos["tEntrada"] = self.tActual
             if paciente.consulta == "general":
-               if paciente.urgencia:
+               if paciente.urgencia or paciente.IDPac in self.lista_prioridad:
                    GeneralUrgente.enqueue(paciente)
                    print(f"{paciente.IDPac} entro en la cola General Urgente")                   
                else:
@@ -72,7 +75,7 @@ class Gestor_Turnos:
                    print(f"{paciente.IDPac} entro en la cola General No Urgente")
                    
             elif paciente.consulta == "specialist":
-               if paciente.urgencia:
+               if paciente.urgencia or paciente.IDPac in self.lista_prioridad:
                    EspecificoUrgente.enqueue(paciente)
                    print(f"{paciente.IDPac} entro en la cola Especifico Urgente")
                else:
@@ -84,40 +87,90 @@ class Gestor_Turnos:
             
 
     #Molaria poder meterle el nombre de la consulta a la que va
+    #Pasa a los pacientes de las colas a las consultas donde se les tratan (si estan libres)
     def pasar_consulta(self, consultas_colas: dict):
         for lista in consultas_colas.keys():
             if not lista.is_empty() and len(consultas_colas[lista]) == 0:
                 en_consulta = lista.dequeue()
-                en_consulta.tiempos["tInicioConsulta"] = self.tActual
+                en_consulta.tiempos["tInicio_consulta"] = self.tActual
                 consultas_colas[lista].append(en_consulta)
                 print(f"{en_consulta.IDPac} ha pasado a consulta; tiempo estimado: {en_consulta.tEstimado} horas")
         return None
-                
-     
+    
+    
+    #Retira de la consulta a los pacientes ya tratados y se les aplica el tTotal y la priorizacion
+    def retirar_consulta(self, consultas_colas:dict):
+        proxima_prioridad = []
+        for consultas in consultas_colas.values():
+            if len(consultas) != 0:
+                if (self.tActual - consultas[0].tiempos["tInicio_consulta"]) >= consultas[0].tEstimado:
+                    consultas[0].tiempos["tFinal_consulta"] = self.tActual
+                    if consultas[0].tiempos["tInicio_consulta"] - consultas[0].tiempos["tEntrada"] >= 7:
+                        proxima_prioridad.append(consultas.pop(0)) #Retorna un paciente que en el futuro tiene que ingresarse en pacientes prioritarios
+                    else:
+                        consultas.remove(consultas[0]) #Si no se cumplen los requisitos no devuelve nada y lo quita de consulta
+                       
+        return proxima_prioridad
 
-
+"""
+#La funcion retirar consulta probablemente se tenga que hacer asi
+pacientes_tratados = retirar(consulta)
+for pacientes in pacientes tratados:
+    self.lista_prioridad.append(pacientes.IDPac) 
+"""
           
 #Sirve para enlazar cada cola a su correspondiente consulta:        
 consultas_colas = {GeneralNoUrgente: Gestor_Turnos.G_NUrgente, GeneralUrgente: Gestor_Turnos.G_Urgente, EspecificoNoUrgente: Gestor_Turnos.E_NUrgente, EspecificoUrgente: Gestor_Turnos.E_Urgente}
 
 
 
-a = Gestor_Turnos()
-a.cargar_pacientes()
-for i in range(6):
-    a.distribuir_pacientes()
+
+
     
-a.pasar_consulta(consultas_colas)
 
 
-print(GeneralNoUrgente.first().tiempos) 
 
+
+
+
+#La clase de admision tiene que estar vacia y las colas tambien (implementar)
+
+
+Gestor = Gestor_Turnos()
+Gestor.cargar_pacientes()
+while not all(colas.is_empty for colas in consultas_colas.keys()): 
+    print(Gestor.tActual)
+    Gestor.distribuir_pacientes()
+    Gestor.pasar_consulta(consultas_colas)
+    pacientes_tratados = Gestor.retirar_consulta(consultas_colas)
+    for pacientes in pacientes_tratados:
+        Gestor.lista_prioridad.append(pacientes.IDPac) #Guardar ID
+        
+    Gestor.actualizar_tiempo()
+    
+    
  ######TO DO:
      #Incluir el contador en descenso por cada vez que turno que pasa y verificar si tFinalConsulta - tInicioConsulta >= tEstimado
-     #Metodo para vaciar las consultas una vez haya terminado de tratarse cada paciente
-     #Funcion de prioridad, control del tiempo que lleva cada paciente en cola (podriamos añadir un nuevo tiempo tEspera que si >= 7 entonces le da prio)
-     #Asignar los valores de tiempo a cada paciente 
-     #Asignar los tiempos en paciente.tiempos
+     #Metodo para vaciar las consultas una vez haya terminado de tratarse cada paciente (Lo mismo)
+     #Funcion de prioridad, control del tiempo que lleva cada paciente en cola (podriamos añadir un nuevo tiempo tEspera que si >= 7 entonces le da prio)  (función retirar_Consulta)
+     #Asignar los valores de tiempo a cada paciente (Hechos)
+     #Asignar los tiempos en paciente.tiempos  (Hechos la mayoria)
      #Volver a poner lo de cargar pacientes en el main (sorry)
      #Matarse. :D
      
+###HAY QUE ELIMINAR A LOS PACIENTES YA TRATADOS CON PRIORIZACION ACTIVA DE LA LISTA
+##PARA LAS ESTADISTICAS TENDREMOS QUE GUARDAR LOS DATOS DE LOS PACIENTES (SOLO HACE FALTA LOS DICCIONARIOS SUPONGO)
+
+###El problema tiene que estar en cargar_pacientes() porque carga todo el rato la misma lista y la vacia cada vez que se le llama
+
+
+#Almacenamiento en el innit hacer los appends directamente,llamar a self.lista_prioridad para guardar ahi los IDs
+
+
+
+
+
+#%%
+for colas in consultas_colas.keys():
+    print(colas)
+

@@ -88,4 +88,6 @@ GeneralNoUrgente = Cola()
 EspecificoUrgente = Cola()
 EspecificoNoUrgente = Cola()
 Admision = Cola()
-   
+    
+
+        
