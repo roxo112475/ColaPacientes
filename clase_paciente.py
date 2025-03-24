@@ -1,11 +1,10 @@
-
 class Paciente:
     def __init__(self, IDPac: int, consulta: str, urgencia: bool, tEstimado: int):
         self.IDPac = IDPac
         self.consulta = consulta
         self.urgencia = urgencia
         self.tEstimado = tEstimado
-        self.tiempos = {"tEstimado": tEstimado, "tLlegada": -1, "tEntrada": -1, "tInicio_consulta": -1, "tFinal_consulta": -1, "tTotal": -1 }
+        self.tiempos = {"tEstimado": tEstimado,  "tEntrada": -1, "tInicio_consulta": -1, "tFinal_consulta": -1, "tTotal": -1 }
 #Propiedades: 
 
     @property

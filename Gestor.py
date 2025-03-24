@@ -4,9 +4,14 @@ from clase_paciente import Paciente
 import sys
 
 class Gestor_Turnos:
-    def __init__(self, tActual= 0):
+    def __init__(self, tActual= 1):
         self._tActual = tActual
         self._lista_prioridad = []
+        self._almacenamiento = []
+
+    @property
+    def almacenamiento(self):
+        return self._almacenamiento
 
     @property
     def tActual(self):
@@ -63,26 +68,38 @@ class Gestor_Turnos:
         
     #Cada paciente lo incluyes en en su cola correspondiente
     def distribuir_pacientes(self):
-        if self.tActual % 3 == 0 and not Admision.is_empty():
+        if self.tActual % 3 == 1 and not Admision.is_empty():
             paciente = Admision.dequeue()
             paciente.tiempos["tEntrada"] = self.tActual
+            
             if paciente.consulta == "general":
                if paciente.urgencia or paciente.IDPac in self.lista_prioridad:
+                   if paciente.IDPac in self.lista_prioridad:
+                       print(f"{self.tActual}: Priorizacion activa {paciente.IDPac} ") 
+                       self.lista_prioridad.remove(paciente.IDPac)
+                       
                    GeneralUrgente.enqueue(paciente)
-                   print(f"{paciente.IDPac} entro en la cola General Urgente")                   
+                   print(f"{self.tActual}: {paciente.IDPac} entro en la cola General Urgente")    
+                   
                else:
                    GeneralNoUrgente.enqueue(paciente)
-                   print(f"{paciente.IDPac} entro en la cola General No Urgente")
+                   print(f"{self.tActual}: {paciente.IDPac} entro en la cola General No Urgente")
+                   
                    
             elif paciente.consulta == "specialist":
                if paciente.urgencia or paciente.IDPac in self.lista_prioridad:
+                   if paciente.IDPac in self.lista_prioridad:
+                       print(f"{self.tActual}: Priorizacion activa {paciente.IDPac} ")
+                       self.lista_prioridad.remove(paciente.IDPac)
+                       
                    EspecificoUrgente.enqueue(paciente)
-                   print(f"{paciente.IDPac} entro en la cola Especifico Urgente")
+                   print(f"{self.tActual}: {paciente.IDPac} entro en la cola Especifico Urgente")
+                   
                else:
                    EspecificoNoUrgente.enqueue(paciente)
-                   print(f"{paciente.IDPac} entro en la cola Especifico No Urgente")
+                   print(f"{self.tActual}: {paciente.IDPac} entro en la cola Especifico No Urgente")
 
-        return None
+
             
             
 
@@ -94,23 +111,29 @@ class Gestor_Turnos:
                 en_consulta = lista.dequeue()
                 en_consulta.tiempos["tInicio_consulta"] = self.tActual
                 consultas_colas[lista].append(en_consulta)
-                print(f"{en_consulta.IDPac} ha pasado a consulta; tiempo estimado: {en_consulta.tEstimado} horas")
-        return None
+                print(f"{self.tActual}: {en_consulta.IDPac} ha pasado a consulta; tiempo estimado: {en_consulta.tEstimado} horas")
+
     
     
     #Retira de la consulta a los pacientes ya tratados y se les aplica el tTotal y la priorizacion
     def retirar_consulta(self, consultas_colas:dict):
-        proxima_prioridad = []
         for consultas in consultas_colas.values():
             if len(consultas) != 0:
                 if (self.tActual - consultas[0].tiempos["tInicio_consulta"]) >= consultas[0].tEstimado:
                     consultas[0].tiempos["tFinal_consulta"] = self.tActual
+                    consultas[0].tiempos["tTotal"] = (self.tActual - consultas[0].tiempos["tEntrada"])
+                    self.almacenamiento.append(consultas[0])
+                    
                     if consultas[0].tiempos["tInicio_consulta"] - consultas[0].tiempos["tEntrada"] >= 7:
-                        proxima_prioridad.append(consultas.pop(0)) #Retorna un paciente que en el futuro tiene que ingresarse en pacientes prioritarios
+                        a = consultas.pop(0)
+                        print(f"{self.tActual}: {a.IDPac} ha salido de consulta")#Retorna un paciente que en el futuro tiene que ingresarse en pacientes prioritarios
+                        self.lista_prioridad.append(a.IDPac)
+                        
                     else:
+                        print(f"{self.tActual}: {consultas[0].IDPac} ha salido de consulta")
                         consultas.remove(consultas[0]) #Si no se cumplen los requisitos no devuelve nada y lo quita de consulta
                        
-        return proxima_prioridad
+
 
 """
 #La funcion retirar consulta probablemente se tenga que hacer asi
@@ -135,20 +158,20 @@ consultas_colas = {GeneralNoUrgente: Gestor_Turnos.G_NUrgente, GeneralUrgente: G
 
 #La clase de admision tiene que estar vacia y las colas tambien (implementar)
 
-
+Ejecutar = True
 Gestor = Gestor_Turnos()
 Gestor.cargar_pacientes()
-while not all(colas.is_empty for colas in consultas_colas.keys()): 
-    print(Gestor.tActual)
-    Gestor.distribuir_pacientes()
+while Ejecutar:
+    Gestor.distribuir_pacientes()   
+    Gestor.retirar_consulta(consultas_colas)     
     Gestor.pasar_consulta(consultas_colas)
-    pacientes_tratados = Gestor.retirar_consulta(consultas_colas)
-    for pacientes in pacientes_tratados:
-        Gestor.lista_prioridad.append(pacientes.IDPac) #Guardar ID
-        
+      
     Gestor.actualizar_tiempo()
+    print()
     
-    
+    if Admision.is_empty() and all(colas.is_empty() for colas in consultas_colas.keys()) and all(len(consultas) == 0 for consultas in consultas_colas.values()):
+        print(Gestor.lista_prioridad)
+        Ejecutar = False
  ######TO DO:
      #Incluir el contador en descenso por cada vez que turno que pasa y verificar si tFinalConsulta - tInicioConsulta >= tEstimado
      #Metodo para vaciar las consultas una vez haya terminado de tratarse cada paciente (Lo mismo)
@@ -174,3 +197,6 @@ while not all(colas.is_empty for colas in consultas_colas.keys()):
 for colas in consultas_colas.keys():
     print(colas)
 
+#%%
+for pacientes in Gestor.almacenamiento:
+    print(f"{pacientes.IDPac}---------{pacientes.tiempos} ")
