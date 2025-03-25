@@ -200,3 +200,7 @@ for colas in consultas_colas.keys():
 #%%
 for pacientes in Gestor.almacenamiento:
     print(f"{pacientes.IDPac}---------{pacientes.tiempos} ")
+
+#%% PANDAS
+import pandas
+datos = pandas.DataFrame()
