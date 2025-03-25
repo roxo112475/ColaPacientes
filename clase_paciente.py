@@ -1,6 +1,6 @@
 
 class Paciente:
-    def __init__(self, IDPac: int, consulta: str, urgencia: bool, tiempos = None):
+    def __init__(self, IDPac: str, consulta: str, urgencia: bool, tiempos = None):
         self.IDPac = IDPac
         self.consulta = consulta
         self.urgencia = urgencia
@@ -62,4 +62,3 @@ class Paciente:
         
     def __str__(self):
         return f"ID: {self.IDPac}, Tipo de Consulta: {self.consulta}, Urgencia: {self.urgencia}, Tiempo Estimado: {self.tiempos['tEstimado']}"
-    
