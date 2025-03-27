@@ -5,7 +5,45 @@ import sys
 import pandas
 
 class Gestor_Turnos:
-    def __init__(self, tActual= 1):
+    """
+     Gestiona la distribución de los pacientes y el tiempo en el hospital.
+ 
+    Gestiona la actualización de las unidades de tiempo en el hospital. Así como se encarga de cargar los pacientes desde el
+    archivo .txt a la Cola de Admision, para distribuirlos en sus Colas correspondientes en función de su prioridad y tipo de
+    consulta para después pasarlos a consulta y retirarlos cuando acaben su sesión.
+ 
+    Methods :
+    ---------
+    actualizar_tiempo(self) : 
+        Actualiza el tiempo del hospital en una unidad.
+
+    cargar_pacientes(self) :
+        Carga pacientes desde un archivo de texto y los almacena en la cola Admision.
+    
+    distribuir_pacientes(self, Admision) :
+        Distribuye a los pacientes en sus colas correspondientes según el tipo de consulta y urgencia (True/False).
+    
+    pasar_consulta(self, consultas_colas: dict) :
+        Pasa los pacientes a la consulta si estas están vacías.
+    
+    retirar_consulta(self, consultas_colas: dict) :
+        Retira pacientes de la consulta y, si han esperado demasiado, los prioriza.
+    """ 
+
+    def __init__(self, tActual= 1) :
+        """
+        Inicializa el gestor de turnos con un tiempo actual y listas vacías.
+        
+        Attributes :
+        -------------
+        _tActual : = 1 (int)
+            Tiempo actual del hospital.
+        _lista_prioridad : list
+            Lista de pacientes priorizados.
+        _almacenamiento : list
+            Almacén de pacientes tratados.
+        """
+
         self._tActual = tActual
         self._lista_prioridad = []
         self._almacenamiento = []
@@ -16,22 +54,30 @@ class Gestor_Turnos:
         return self._numero_prios
     
     @property
-    def almacenamiento(self):
+    def almacenamiento(self) :
+        """Devuelve la lista de pacientes almacenados."""
+        
         return self._almacenamiento
 
     @property
-    def tActual(self):
+    def tActual(self) :
+        """Devuelve el tiempo actual del hospital."""
+        
         return self._tActual
 
     @tActual.setter
-    def tActual(self, value):
+    def tActual(self, value) :
+        """Actualiza el tiempo actual, asegurando que sea un entero positivo."""
+
         if isinstance(value, int) and value >= 0:
             self._tActual = value
         else:
             raise ValueError("El tiempo actual tiene que ser un número entero positivo")
     
     @property
-    def lista_prioridad(self):
+    def lista_prioridad(self) :
+        """Devuelve la lista de pacientes prioritarios."""
+
         return self._lista_prioridad
 
                 
@@ -41,7 +87,15 @@ class Gestor_Turnos:
     E_Urgente = []
     E_NUrgente = []
 # Metodos
-    def actualizar_tiempo(self):
+    def actualizar_tiempo(self) :
+        """
+        Actualiza el tiempo del hospital en una unidad.
+        
+        Return :
+        --------
+        None
+        """
+
         self._tActual += 1
 
             
@@ -75,47 +129,58 @@ class Gestor_Turnos:
 
         return None
 
+    
+    def distribuir_pacientes(self, Admision) :
+        """
+        Distribuye a los pacientes en sus colas correspondientes según el tipo de consulta y urgencia (True/False).
         
-    #Cada paciente lo incluyes en en su cola correspondiente
-    def distribuir_pacientes(self):
-        if self.tActual % 3 == 1 and not Admision.is_empty():
+        Return :
+            None
+        """
+
+        if self.tActual %  3 == 1 and not Admision.is_empty():
+
             paciente = Admision.dequeue()
             paciente.tiempos["tEntrada"] = self.tActual
             
             if paciente.consulta == "general":
                if paciente.urgencia or paciente.IDPac in self.lista_prioridad:
                    if paciente.IDPac in self.lista_prioridad:
-                       print(f"{self.tActual}: Priorizacion activa {paciente.IDPac} ") 
+                       print(f"{self.tActual}: Priorización aplicada {paciente.IDPac}")
                        self.lista_prioridad.remove(paciente.IDPac)
                        
                    GeneralUrgente.enqueue(paciente)
-                   print(f"{self.tActual}: {paciente.IDPac} entro en la cola General Urgente")    
+                   print(f"{self.tActual}: {paciente.IDPac} en cola {paciente.consulta}/Urgente: {paciente.urgencia} EST:{paciente.tEstimado}")    
                    
                else:
                    GeneralNoUrgente.enqueue(paciente)
-                   print(f"{self.tActual}: {paciente.IDPac} entro en la cola General No Urgente")
+                   print(f"{self.tActual}: {paciente.IDPac} en cola {paciente.consulta}/Urgente: {paciente.urgencia} EST:{paciente.tEstimado}")
                    
                    
             elif paciente.consulta == "specialist":
                if paciente.urgencia or paciente.IDPac in self.lista_prioridad:
                    if paciente.IDPac in self.lista_prioridad:
-                       print(f"{self.tActual}: Priorizacion activa {paciente.IDPac} ")
+                       print(f"{self.tActual}: Priorización aplicada {paciente.IDPac}")
                        self.lista_prioridad.remove(paciente.IDPac)
                        
                    EspecificoUrgente.enqueue(paciente)
-                   print(f"{self.tActual}: {paciente.IDPac} entro en la cola Especifico Urgente")
+                   print(f"{self.tActual}: {paciente.IDPac} en cola {paciente.consulta}/Urgente: {paciente.urgencia} EST:{paciente.tEstimado}")
                    
                else:
                    EspecificoNoUrgente.enqueue(paciente)
-                   print(f"{self.tActual}: {paciente.IDPac} entro en la cola Especifico No Urgente")
+                   print(f"{self.tActual}: {paciente.IDPac} en cola {paciente.consulta}/Urgente: {paciente.urgencia} EST:{paciente.tEstimado}")
+        return None
 
 
-            
-            
+    def pasar_consulta(self, consultas_colas: dict) :
+        """
+        Pasa los pacientes a la consulta si estas están vacías.
+        
+        Return :
+        --------
+            None
+        """
 
-    #Molaria poder meterle el nombre de la consulta a la que va
-    #Pasa a los pacientes de las colas a las consultas donde se les tratan (si estan libres)
-    def pasar_consulta(self, consultas_colas: dict):
         for lista in consultas_colas.keys():
             if not lista.is_empty() and len(consultas_colas[lista]) == 0:
                 en_consulta = lista.dequeue()
@@ -136,9 +201,10 @@ class Gestor_Turnos:
                     paciente.tiempos["tTotal"] = (self.tActual - paciente.tiempos["tEntrada"])
                     self.almacenamiento.append(paciente.__dict__.values())
                     
-                    if consultas[0].tiempos["tInicio_consulta"] - consultas[0].tiempos["tEntrada"] >= 7:
+                    if paciente.tiempos["tInicio_consulta"] - paciente.tiempos["tEntrada"] >= 7 :
                         a = consultas.pop(0)
-                        print(f"{self.tActual}: {a.IDPac} ha salido de consulta")#Retorna un paciente que en el futuro tiene que ingresarse en pacientes prioritarios
+                        print(f'{self.tActual}: {paciente.IDPac} sale {paciente.consulta}/Urgente: {paciente.urgencia} ADM:{paciente.tiempos['tEntrada']}, INI: {paciente.tiempos['tInicio_consulta']}, EST./TOTAL: {paciente.tiempos['tEstimado']}/{paciente.tiempos['tTotal']}')
+                        print(f"{self.tActual}: Priorización activa {paciente.IDPac}")
                         self.lista_prioridad.append(a.IDPac)
                         self.actualizar_numero_prios()
                         
