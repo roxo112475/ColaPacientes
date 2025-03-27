@@ -8,7 +8,7 @@ from Colas import Cola, GeneralNoUrgente, GeneralUrgente, EspecificoNoUrgente, E
 consultas_colas = {GeneralNoUrgente: Gestor_Turnos.G_NUrgente, GeneralUrgente: Gestor_Turnos.G_Urgente, EspecificoNoUrgente: Gestor_Turnos.E_NUrgente, EspecificoUrgente: Gestor_Turnos.E_Urgente}
 
 # Funciones
-def cargar_paciente(cola: Cola) : 
+def cargar_paciente(self) : 
         # Leer el archivo de configuración desde la línea de comandos o usar el predeterminado
         config_file = sys.argv[1] if len(sys.argv) > 1 else "./patients0.txt"
     
@@ -26,11 +26,11 @@ def cargar_paciente(cola: Cola) :
             consulta = datos_paciente[1]
             urgencia = datos_paciente[2].lower() == "true"
             tEstimado = int(datos_paciente[3])
-            
-            paciente = Paciente(IDPac, consulta, urgencia)
-            paciente.tiempos['tEstimado'] = tEstimado
-            cola.enqueue(paciente)            
-            return
+            paciente = Paciente(IDPac, consulta, urgencia, tEstimado)
+            paciente.tiempos["tLlegada"] = self.tActual
+            Admision.enqueue(paciente)            
+
+        return None
 
 # Código main()
 
