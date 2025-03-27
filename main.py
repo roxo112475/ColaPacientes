@@ -3,9 +3,11 @@
 import sys
 from Gestor import Gestor_Turnos
 from clase_paciente import Paciente
-from Colas import Cola
-# Funciones
+from Colas import Cola, GeneralNoUrgente, GeneralUrgente, EspecificoNoUrgente, EspecificoUrgente, Admision
 
+consultas_colas = {GeneralNoUrgente: Gestor_Turnos.G_NUrgente, GeneralUrgente: Gestor_Turnos.G_Urgente, EspecificoNoUrgente: Gestor_Turnos.E_NUrgente, EspecificoUrgente: Gestor_Turnos.E_Urgente}
+
+# Funciones
 def cargar_paciente(cola: Cola) : 
         # Leer el archivo de configuración desde la línea de comandos o usar el predeterminado
         config_file = sys.argv[1] if len(sys.argv) > 1 else "./patients0.txt"
@@ -33,7 +35,18 @@ def cargar_paciente(cola: Cola) :
 # Código main()
 
 if __name__ == '__main__' :
-    admision = Gestor_Turnos.Admision
-    cargar_paciente(admision)
-    print(admision)
+    Gestor = Gestor_Turnos()    
     
+    Ejecutar = True
+
+    Gestor.cargar_pacientes()
+    while Ejecutar:
+        Gestor.distribuir_pacientes(Admision)   
+        Gestor.retirar_consulta(consultas_colas)     
+        Gestor.pasar_consulta(consultas_colas)
+          
+        Gestor.actualizar_tiempo()
+        print()
+        
+        if Admision.is_empty() and all(colas.is_empty() for colas in consultas_colas.keys()) and all(len(consultas) == 0 for consultas in consultas_colas.values()):
+            Ejecutar = False
