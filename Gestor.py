@@ -2,6 +2,7 @@
 from Colas import Cola, GeneralNoUrgente, GeneralUrgente, EspecificoNoUrgente, EspecificoUrgente, Admision
 from clase_paciente import Paciente
 import sys
+import pandas
 
 class Gestor_Turnos:
     """
@@ -15,6 +16,9 @@ class Gestor_Turnos:
     ---------
     actualizar_tiempo(self) : 
         Actualiza el tiempo del hospital en una unidad.
+
+    actualizar_numero_prios(self)
+        Añade uno al numero de veces que ha aplicado la priorizacion activa
 
     cargar_pacientes(self) :
         Carga pacientes desde un archivo de texto y los almacena en la cola Admision.
@@ -40,13 +44,20 @@ class Gestor_Turnos:
         _lista_prioridad : list
             Lista de pacientes priorizados.
         _almacenamiento : list
-            Almacén de pacientes tratados.
+            Almacena los pacientes tratados.
+        _numero_prios: = 0 (int)
+            Numero de veces que se ha aplicado la priorizacion activa
         """
 
         self._tActual = tActual
         self._lista_prioridad = []
         self._almacenamiento = []
-
+        self._numero_prios = 0
+    
+    @property
+    def numero_prios(self):
+        return self._numero_prios
+    
     @property
     def almacenamiento(self) :
         """Devuelve la lista de pacientes almacenados."""
@@ -91,18 +102,14 @@ class Gestor_Turnos:
         """
 
         self._tActual += 1
-        return None
 
-    
-    def cargar_pacientes(self) :
-        """
-        Carga pacientes desde un archivo de texto y los almacena en la cola Admision.
-        
-        Return :
-        --------
-            None
-        """
+            
+    def actualizar_numero_prios(self):
+        self._numero_prios += 1
 
+
+#Carga los pacientes del txto todos a la vez
+    def cargar_pacientes(self):
         # Leer el archivo de configuración desde la línea de comandos o usar el predeterminado
         config_file = sys.argv[1] if len(sys.argv) > 1 else "./patients0.txt"
     
@@ -181,22 +188,15 @@ class Gestor_Turnos:
 
         for lista in consultas_colas.keys():
             if not lista.is_empty() and len(consultas_colas[lista]) == 0:
-                paciente = lista.dequeue()
-                paciente.tiempos["tInicio_consulta"] = self.tActual
-                consultas_colas[lista].append(paciente)
-                print(f"{self.tActual}: {paciente.IDPac} entra {paciente.consulta}/Urgente: {paciente.urgencia} ADM:{paciente.tiempos['tEntrada']}, INI: {paciente.tiempos['tInicio_consulta']}, EST: {paciente.tEstimado}")
-        return None
+                en_consulta = lista.dequeue()
+                en_consulta.tiempos["tInicio_consulta"] = self.tActual
+                consultas_colas[lista].append(en_consulta)
+                print(f"{self.tActual}: {en_consulta.IDPac} ha pasado a consulta; tiempo estimado: {en_consulta.tEstimado} horas")
+
     
-
+    
+    #Retira de la consulta a los pacientes ya tratados y se les aplica el tTotal y la priorizacion
     def retirar_consulta(self, consultas_colas: dict) :
-        """
-        Retira pacientes de la consulta y, si han esperado demasiado, los prioriza.
-        
-        Return :
-        --------
-            None
-        """
-
         for consultas in consultas_colas.values() :
             if len(consultas) != 0 :
                 paciente = consultas[0]
@@ -204,15 +204,16 @@ class Gestor_Turnos:
                 if (self.tActual - paciente.tiempos["tInicio_consulta"]) >= paciente.tEstimado:
                     paciente.tiempos["tFinal_consulta"] = self.tActual
                     paciente.tiempos["tTotal"] = (self.tActual - paciente.tiempos["tEntrada"])
-                    self.almacenamiento.append(paciente)
+                    self.almacenamiento.append(paciente.__dict__.values())
                     
                     if paciente.tiempos["tInicio_consulta"] - paciente.tiempos["tEntrada"] >= 7 :
                         a = consultas.pop(0)
                         print(f'{self.tActual}: {paciente.IDPac} sale {paciente.consulta}/Urgente: {paciente.urgencia} ADM:{paciente.tiempos['tEntrada']}, INI: {paciente.tiempos['tInicio_consulta']}, EST./TOTAL: {paciente.tiempos['tEstimado']}/{paciente.tiempos['tTotal']}')
                         print(f"{self.tActual}: Priorización activa {paciente.IDPac}")
                         self.lista_prioridad.append(a.IDPac)
+                        self.actualizar_numero_prios()
                         
                     else:
                         print(f"{self.tActual}: {paciente.IDPac} sale {paciente.consulta}/Urgente: {paciente.urgencia} ADM:{paciente.tiempos['tEntrada']}, INI: {paciente.tiempos['tInicio_consulta']}, EST./TOTAL: {paciente.tiempos['tEstimado']}/{paciente.tiempos['tTotal']}")
-                        consultas.remove(paciente)
-        return None
+                        consultas.remove(paciente) #Si no se cumplen los requisitos no devuelve nada y lo quita de consulta
+
