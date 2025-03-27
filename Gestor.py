@@ -4,28 +4,74 @@ from clase_paciente import Paciente
 import sys
 
 class Gestor_Turnos:
-    def __init__(self, tActual= 1):
+    """
+     Gestiona la distribución de los pacientes y el tiempo en el hospital.
+ 
+    Gestiona la actualización de las unidades de tiempo en el hospital. Así como se encarga de cargar los pacientes desde el
+    archivo .txt a la Cola de Admision, para distribuirlos en sus Colas correspondientes en función de su prioridad y tipo de
+    consulta para después pasarlos a consulta y retirarlos cuando acaben su sesión.
+ 
+    Methods :
+    ---------
+    actualizar_tiempo(self) : 
+        Actualiza el tiempo del hospital en una unidad.
+
+    cargar_pacientes(self) :
+        Carga pacientes desde un archivo de texto y los almacena en la cola Admision.
+    
+    distribuir_pacientes(self, Admision) :
+        Distribuye a los pacientes en sus colas correspondientes según el tipo de consulta y urgencia (True/False).
+    
+    pasar_consulta(self, consultas_colas: dict) :
+        Pasa los pacientes a la consulta si estas están vacías.
+    
+    retirar_consulta(self, consultas_colas: dict) :
+        Retira pacientes de la consulta y, si han esperado demasiado, los prioriza.
+    """ 
+
+    def __init__(self, tActual= 1) :
+        """
+        Inicializa el gestor de turnos con un tiempo actual y listas vacías.
+        
+        Attributes :
+        -------------
+        _tActual : = 1 (int)
+            Tiempo actual del hospital.
+        _lista_prioridad : list
+            Lista de pacientes priorizados.
+        _almacenamiento : list
+            Almacén de pacientes tratados.
+        """
+
         self._tActual = tActual
         self._lista_prioridad = []
         self._almacenamiento = []
 
     @property
-    def almacenamiento(self):
+    def almacenamiento(self) :
+        """Devuelve la lista de pacientes almacenados."""
+        
         return self._almacenamiento
 
     @property
-    def tActual(self):
+    def tActual(self) :
+        """Devuelve el tiempo actual del hospital."""
+        
         return self._tActual
 
     @tActual.setter
-    def tActual(self, value):
+    def tActual(self, value) :
+        """Actualiza el tiempo actual, asegurando que sea un entero positivo."""
+
         if isinstance(value, int) and value >= 0:
             self._tActual = value
         else:
             raise ValueError("El tiempo actual tiene que ser un número entero positivo")
     
     @property
-    def lista_prioridad(self):
+    def lista_prioridad(self) :
+        """Devuelve la lista de pacientes prioritarios."""
+
         return self._lista_prioridad
 
                 
@@ -35,12 +81,28 @@ class Gestor_Turnos:
     E_Urgente = []
     E_NUrgente = []
 # Metodos
-    def actualizar_tiempo(self):
+    def actualizar_tiempo(self) :
+        """
+        Actualiza el tiempo del hospital en una unidad.
+        
+        Return :
+        --------
+        None
+        """
+
         self._tActual += 1
+        return None
 
     
-#Carga los pacientes del txto todos a la vez
-    def cargar_pacientes(self):
+    def cargar_pacientes(self) :
+        """
+        Carga pacientes desde un archivo de texto y los almacena en la cola Admision.
+        
+        Return :
+        --------
+            None
+        """
+
         # Leer el archivo de configuración desde la línea de comandos o usar el predeterminado
         config_file = sys.argv[1] if len(sys.argv) > 1 else "./patients0.txt"
     
@@ -65,9 +127,15 @@ class Gestor_Turnos:
 
         return None
 
+    
+    def distribuir_pacientes(self, Admision) :
+        """
+        Distribuye a los pacientes en sus colas correspondientes según el tipo de consulta y urgencia (True/False).
         
-    #Cada paciente lo incluyes en en su cola correspondiente
-    def distribuir_pacientes(self, Admision):
+        Return :
+            None
+        """
+
         if self.tActual %  3 == 1 and not Admision.is_empty():
 
             paciente = Admision.dequeue()
@@ -99,25 +167,36 @@ class Gestor_Turnos:
                else:
                    EspecificoNoUrgente.enqueue(paciente)
                    print(f"{self.tActual}: {paciente.IDPac} en cola {paciente.consulta}/Urgente: {paciente.urgencia} EST:{paciente.tEstimado}")
+        return None
 
 
-            
-            
+    def pasar_consulta(self, consultas_colas: dict) :
+        """
+        Pasa los pacientes a la consulta si estas están vacías.
+        
+        Return :
+        --------
+            None
+        """
 
-    #Molaria poder meterle el nombre de la consulta a la que va
-    #Pasa a los pacientes de las colas a las consultas donde se les tratan (si estan libres)
-    def pasar_consulta(self, consultas_colas: dict):
         for lista in consultas_colas.keys():
             if not lista.is_empty() and len(consultas_colas[lista]) == 0:
                 paciente = lista.dequeue()
                 paciente.tiempos["tInicio_consulta"] = self.tActual
                 consultas_colas[lista].append(paciente)
                 print(f"{self.tActual}: {paciente.IDPac} entra {paciente.consulta}/Urgente: {paciente.urgencia} ADM:{paciente.tiempos['tEntrada']}, INI: {paciente.tiempos['tInicio_consulta']}, EST: {paciente.tEstimado}")
+        return None
+    
 
-    
-    
-    #Retira de la consulta a los pacientes ya tratados y se les aplica el tTotal y la priorizacion:
     def retirar_consulta(self, consultas_colas: dict) :
+        """
+        Retira pacientes de la consulta y, si han esperado demasiado, los prioriza.
+        
+        Return :
+        --------
+            None
+        """
+
         for consultas in consultas_colas.values() :
             if len(consultas) != 0 :
                 paciente = consultas[0]
@@ -135,4 +214,5 @@ class Gestor_Turnos:
                         
                     else:
                         print(f"{self.tActual}: {paciente.IDPac} sale {paciente.consulta}/Urgente: {paciente.urgencia} ADM:{paciente.tiempos['tEntrada']}, INI: {paciente.tiempos['tInicio_consulta']}, EST./TOTAL: {paciente.tiempos['tEstimado']}/{paciente.tiempos['tTotal']}")
-                        consultas.remove(paciente) #Si no se cumplen los requisitos no devuelve nada y lo quita de consulta
+                        consultas.remove(paciente)
+        return None
