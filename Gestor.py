@@ -17,6 +17,9 @@ class Gestor_Turnos:
     actualizar_tiempo(self) : 
         Actualiza el tiempo del hospital en una unidad.
 
+    actualizar_numero_prios(self)
+        Añade uno al numero de veces que ha aplicado la priorizacion activa
+
     cargar_pacientes(self) :
         Carga pacientes desde un archivo de texto y los almacena en la cola Admision.
     
@@ -41,7 +44,9 @@ class Gestor_Turnos:
         _lista_prioridad : list
             Lista de pacientes priorizados.
         _almacenamiento : list
-            Almacén de pacientes tratados.
+            Almacena los pacientes tratados.
+        _numero_prios: = 0 (int)
+            Numero de veces que se ha aplicado la priorizacion activa
         """
 
         self._tActual = tActual
