@@ -116,7 +116,7 @@ class Gestor_Turnos:
 
     
     
-    #Retira de la consulta a los pacientes ya tratados y se les aplica el tTotal y la priorizacion
+    #Retira de la consulta a los pacientes ya tratados y se les aplica el tTotal y la priorizacion:
     def retirar_consulta(self, consultas_colas: dict) :
         for consultas in consultas_colas.values() :
             if len(consultas) != 0 :

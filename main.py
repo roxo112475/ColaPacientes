@@ -46,7 +46,7 @@ if __name__ == '__main__' :
         Gestor.pasar_consulta(consultas_colas)
           
         Gestor.actualizar_tiempo()
-        print()
+
         
         if Admision.is_empty() and all(colas.is_empty() for colas in consultas_colas.keys()) and all(len(consultas) == 0 for consultas in consultas_colas.values()):
             Ejecutar = False
