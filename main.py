@@ -13,6 +13,10 @@ def media_ColaEspera(registro: dict) :
     """
     Para el registro de tiempos por consulta, hace su media y lo almacena.
 
+    Exception :
+    -----------
+        ValueError : Cuando los datos de tiempo de espera en cola no son enteros positivos.
+
     Return :
     --------
         dict : diccionario con las medias de los 'values' originales.
@@ -26,7 +30,7 @@ def media_ColaEspera(registro: dict) :
                 raise ValueError('Los datos de tiempo de espera en cola deben ser enteros positivos.')
 
             aux += registro[consulta][paciente]
-        registro[consulta] = aux
+        registro[consulta] = aux/len(registro[consulta])
         aux = 0
 
     return registro
@@ -50,7 +54,9 @@ if __name__ == '__main__' :
         
         if Admision.is_empty() and all(colas.is_empty() for colas in consultas_colas.keys()) and all(len(consultas) == 0 for consultas in consultas_colas.values()):
             Ejecutar = False
+            print()
     
+    # Punto 2 del pandas: media del tiempo de espera a consulta distinguido en tipos de consulta
     registro = media_ColaEspera(Gestor.tiempoCola)
-    registro = pd.DataFrame(registro)
+    registro = pd.DataFrame.from_dict(registro, orient='index', columns=['Tiempo Medio de Espera'])
     print(registro)

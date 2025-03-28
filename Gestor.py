@@ -96,10 +96,12 @@ class Gestor_Turnos:
 
                 
 #Consultas:
+
     G_Urgente = []
     G_NUrgente = []
     E_Urgente = []
     E_NUrgente = []
+
 # Metodos
 
     def actualizar_TiempoColas(self, paciente: Paciente) :
@@ -108,7 +110,7 @@ class Gestor_Turnos:
         
         Exception :
         -----------
-            TypeError: El tiempo del paciente no esta siendo indexado en ninguna lista.
+            IndexError: El tiempo del paciente no esta siendo indexado en ninguna lista.
 
         Return :
         --------
@@ -126,7 +128,7 @@ class Gestor_Turnos:
             else :
                 self.tiempoCola['ColaEspecíficaNoUrgente'].append(paciente.tiempos['tInicio_consulta'] - paciente.tiempos['tEntrada'])
         else : 
-            raise TypeError('El tiempo de espera no está siendo indexado en ninguna de las listas de registro.')
+            raise IndexError('El tiempo de espera no está siendo indexado en ninguna de las listas de registro.')
         return None
 
     def actualizar_tiempo(self) :
@@ -239,9 +241,7 @@ class Gestor_Turnos:
                 consultas_colas[lista].append(en_consulta)
 
                 self.actualizar_TiempoColas(en_consulta) # mete el tiempo de espera en la lista
-
-                print(f"{self.tActual}: {en_consulta.IDPac} ha pasado a consulta; tiempo estimado: {en_consulta.tEstimado} horas")
-
+                print(f"{self.tActual}: {en_consulta.IDPac} entra {en_consulta.consulta}/Urgencia: {en_consulta.urgencia} ADM:{en_consulta.tiempos['tEntrada']}, INI: {en_consulta.tiempos['tInicio_consulta']}, EST: {en_consulta.tEstimado}")
     
     
     #Retira de la consulta a los pacientes ya tratados y se les aplica el tTotal y la priorizacion
