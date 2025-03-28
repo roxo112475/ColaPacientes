@@ -53,6 +53,13 @@ class Gestor_Turnos:
         self._lista_prioridad = []
         self._almacenamiento = []
         self._numero_prios = 0
+        self._tiempoCola = []
+
+    @property
+    def tiempoCola(self) :
+        """Devuelve la lista de tiempos de espera."""
+
+        return self._tiempoCola
     
     @property
     def numero_prios(self):
@@ -94,6 +101,19 @@ class Gestor_Turnos:
     E_Urgente = []
     E_NUrgente = []
 # Metodos
+
+    def actualizar_TiempoColas(self, t_espera: int) :
+        """
+        Añade el tiempo de espera de un paciente al entrar este en consulta.
+        
+        Return :
+        --------
+            None
+        """
+        
+        self.tiempoCola.append(t_espera)
+        return None
+
     def actualizar_tiempo(self) :
         """
         Actualiza el tiempo del hospital en una unidad.
@@ -202,6 +222,9 @@ class Gestor_Turnos:
                 en_consulta = lista.dequeue()
                 en_consulta.tiempos["tInicio_consulta"] = self.tActual
                 consultas_colas[lista].append(en_consulta)
+
+                actualizar_TiempoColas(en_consulta.tiempos['tInicio_consulta'] - en_consulta.tiempos['tEntrada']) # mete el tiempo de espera en la lista
+
                 print(f"{self.tActual}: {en_consulta.IDPac} ha pasado a consulta; tiempo estimado: {en_consulta.tEstimado} horas")
 
     
