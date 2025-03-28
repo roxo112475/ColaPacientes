@@ -53,11 +53,11 @@ class Gestor_Turnos:
         self._lista_prioridad = []
         self._almacenamiento = []
         self._numero_prios = 0
-        self._tiempoCola = []
+        self._tiempoCola = {'ColaGeneralNoUrgente': [], 'ColaGeneralUrgente': [], 'ColaEspecíficaNoUrgente': [], 'ColaEspecíficaUrgente': []}
 
     @property
     def tiempoCola(self) :
-        """Devuelve la lista de tiempos de espera."""
+        """Devuelve el diccionario de listas de tiempos de espera."""
 
         return self._tiempoCola
     
@@ -102,7 +102,7 @@ class Gestor_Turnos:
     E_NUrgente = []
 # Metodos
 
-    def actualizar_TiempoColas(self, t_espera: int) :
+    def actualizar_TiempoColas(self, paciente: Paciente) :
         """
         Añade el tiempo de espera de un paciente al entrar este en consulta.
         
@@ -110,8 +110,18 @@ class Gestor_Turnos:
         --------
             None
         """
+        if paciente.consulta == 'General' :
+            if paciente.urgencia == True:
+                self.tiempoCola['ColaGeneralUrgente'].append(paciente.tiempos['tInicio_consulta'] - paciente.tiempos['tEntrada'])
+            else :
+                self.tiempoCola['ColaGeneralNoUrgente'].append(paciente.tiempos['tInicio_consulta'] - paciente.tiempos['tEntrada'])
         
-        self.tiempoCola.append(t_espera)
+        elif paciente.consulta == 'Especifico' :
+            if paciente.urgencia == True:
+                self.tiempoCola['ColaEspecíficaUrgente'].append(paciente.tiempos['tInicio_consulta'] - paciente.tiempos['tEntrada'])
+            else :
+                self.tiempoCola['ColaEspecíficaNoUrgente'].append(paciente.tiempos['tInicio_consulta'] - paciente.tiempos['tEntrada'])
+
         return None
 
     def actualizar_tiempo(self) :
@@ -223,7 +233,7 @@ class Gestor_Turnos:
                 en_consulta.tiempos["tInicio_consulta"] = self.tActual
                 consultas_colas[lista].append(en_consulta)
 
-                actualizar_TiempoColas(en_consulta.tiempos['tInicio_consulta'] - en_consulta.tiempos['tEntrada']) # mete el tiempo de espera en la lista
+                actualizar_TiempoColas(en_consulta) # mete el tiempo de espera en la lista
 
                 print(f"{self.tActual}: {en_consulta.IDPac} ha pasado a consulta; tiempo estimado: {en_consulta.tEstimado} horas")
 
