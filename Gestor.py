@@ -56,6 +56,8 @@ class Gestor_Turnos:
     
     @property
     def numero_prios(self):
+        """Devuelve el nuero de priorizados totales."""
+
         return self._numero_prios
     
     @property
@@ -104,12 +106,21 @@ class Gestor_Turnos:
         self._tActual += 1
 
             
-    def actualizar_numero_prios(self):
+    def actualizar_numero_prios(self) :
+        """Aumenta en 1 unidad el numero de priorizados totales."""
         self._numero_prios += 1
 
 
 #Carga los pacientes del txto todos a la vez
-    def cargar_pacientes(self):
+    def cargar_pacientes(self) :
+        """
+        Lee un archivo .txt del que extrae los datos de los pacientes.
+
+        Return : 
+        --------
+            None
+        """
+
         # Leer el archivo de configuración desde la línea de comandos o usar el predeterminado
         config_file = sys.argv[1] if len(sys.argv) > 1 else "./patients0.txt"
     
@@ -197,6 +208,14 @@ class Gestor_Turnos:
     
     #Retira de la consulta a los pacientes ya tratados y se les aplica el tTotal y la priorizacion
     def retirar_consulta(self, consultas_colas: dict) :
+        """
+        Retira a un paciente de su consulta en caso de que ya haya terminado (tActual - tEntrada >= tEstimado).
+
+        Return :
+        --------
+            None
+        """
+
         for consultas in consultas_colas.values() :
             if len(consultas) != 0 :
                 paciente = consultas[0]
@@ -216,4 +235,4 @@ class Gestor_Turnos:
                     else:
                         print(f"{self.tActual}: {paciente.IDPac} sale {paciente.consulta}/Urgente: {paciente.urgencia} ADM:{paciente.tiempos['tEntrada']}, INI: {paciente.tiempos['tInicio_consulta']}, EST./TOTAL: {paciente.tiempos['tEstimado']}/{paciente.tiempos['tTotal']}")
                         consultas.remove(paciente) #Si no se cumplen los requisitos no devuelve nada y lo quita de consulta
-
+        return None
