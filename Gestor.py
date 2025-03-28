@@ -106,22 +106,27 @@ class Gestor_Turnos:
         """
         Añade el tiempo de espera de un paciente al entrar este en consulta.
         
+        Exception :
+        -----------
+            TypeError: El tiempo del paciente no esta siendo indexado en ninguna lista.
+
         Return :
         --------
             None
         """
-        if paciente.consulta == 'General' :
+        if paciente.consulta == "general" :
             if paciente.urgencia == True:
                 self.tiempoCola['ColaGeneralUrgente'].append(paciente.tiempos['tInicio_consulta'] - paciente.tiempos['tEntrada'])
             else :
                 self.tiempoCola['ColaGeneralNoUrgente'].append(paciente.tiempos['tInicio_consulta'] - paciente.tiempos['tEntrada'])
         
-        elif paciente.consulta == 'Especifico' :
+        elif paciente.consulta == "specialist" :
             if paciente.urgencia == True:
                 self.tiempoCola['ColaEspecíficaUrgente'].append(paciente.tiempos['tInicio_consulta'] - paciente.tiempos['tEntrada'])
             else :
                 self.tiempoCola['ColaEspecíficaNoUrgente'].append(paciente.tiempos['tInicio_consulta'] - paciente.tiempos['tEntrada'])
-
+        else : 
+            raise TypeError('El tiempo de espera no está siendo indexado en ninguna de las listas de registro.')
         return None
 
     def actualizar_tiempo(self) :
