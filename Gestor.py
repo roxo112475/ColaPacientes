@@ -233,7 +233,7 @@ class Gestor_Turnos:
                 en_consulta.tiempos["tInicio_consulta"] = self.tActual
                 consultas_colas[lista].append(en_consulta)
 
-                en_consulta.actualizar_TiempoColas(en_consulta) # mete el tiempo de espera en la lista
+                self.actualizar_TiempoColas(en_consulta) # mete el tiempo de espera en la lista
 
                 print(f"{self.tActual}: {en_consulta.IDPac} ha pasado a consulta; tiempo estimado: {en_consulta.tEstimado} horas")
 
