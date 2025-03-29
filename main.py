@@ -9,7 +9,8 @@ import pandas as pd
 
 # functions
 
-def media_ColaEspera(registro: dict) :
+def estadisticas(registro: dict, media_prios: dict ) :
+
     """
     Para el registro de tiempos por consulta, hace su media y lo almacena.
 
@@ -23,6 +24,28 @@ def media_ColaEspera(registro: dict) :
     """
     aux = 0
 
+    #Numero total de pacientes de cada tipo 
+    total_general = 0
+    total_especifico = 0
+
+    #Media Priorizaciones:
+    for paciente in Gestor.almacenamiento:
+        if paciente.consulta == "general":
+            total_general += 1
+        else:
+            total_especifico += 1
+
+
+    media_prios["general"] = media_prios["general"]/total_general
+    media_prios["especialidad"] = media_prios["especialidad"]/ total_especifico
+
+
+    media_prios = pd.DataFrame.from_dict(media_prios, orient='index', columns=['Numero Medio De Citas Con Priorizacion Aplicada' ])
+  
+
+
+    #Tiempo Medio de Espera
+   
     for consulta in registro :
         
         for paciente in range(len(registro[consulta])) :
@@ -33,7 +56,13 @@ def media_ColaEspera(registro: dict) :
         registro[consulta] = aux/len(registro[consulta])
         aux = 0
 
-    return registro
+    
+    registro = pd.DataFrame.from_dict(registro, orient='index', columns=['Tiempo Medio De Permanencia En Las Colas'])
+
+    print(registro, "\n")
+    print(media_prios)
+
+
 
 
 # Código main()
@@ -56,7 +85,4 @@ if __name__ == '__main__' :
             Ejecutar = False
             print()
     
-    # Punto 2 del pandas: media del tiempo de espera a consulta distinguido en tipos de consulta
-    registro = media_ColaEspera(Gestor.tiempoCola)
-    registro = pd.DataFrame.from_dict(registro, orient='index', columns=['Tiempo Medio de Espera'])
-    print(registro)
+    estadisticas(Gestor.tiempoCola, Gestor.numero_prios)

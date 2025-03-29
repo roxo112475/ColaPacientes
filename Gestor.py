@@ -52,7 +52,7 @@ class Gestor_Turnos:
         self._tActual = tActual
         self._lista_prioridad = []
         self._almacenamiento = []
-        self._numero_prios = 0
+        self._numero_prios = {"general": 0, "especialidad": 0}
         self._tiempoCola = {'ColaGeneralNoUrgente': [], 'ColaGeneralUrgente': [], 'ColaEspecíficaNoUrgente': [], 'ColaEspecíficaUrgente': []}
 
     @property
@@ -63,7 +63,7 @@ class Gestor_Turnos:
     
     @property
     def numero_prios(self):
-        """Devuelve el nuero de priorizados totales."""
+        """Devuelve el numero de priorizados totales ordenados por tipo de consulta."""
 
         return self._numero_prios
     
@@ -141,11 +141,13 @@ class Gestor_Turnos:
         """
 
         self._tActual += 1
-
-            
-    def actualizar_numero_prios(self) :
+        
+    def actualizar_numero_prios(self, paciente:Paciente) :
         """Aumenta en 1 unidad el numero de priorizados totales."""
-        self._numero_prios += 1
+        if paciente.consulta == "general":
+                self._numero_prios["general"] += 1
+        else:
+            self._numero_prios["especialidad"] += 1
 
 
 #Carga los pacientes del txto todos a la vez
@@ -199,8 +201,10 @@ class Gestor_Turnos:
             if paciente.consulta == "general":
                if paciente.urgencia or paciente.IDPac in self.lista_prioridad:
                    if paciente.IDPac in self.lista_prioridad:
-                       print(f"{self.tActual}: Priorización aplicada {paciente.IDPac}")
-                       self.lista_prioridad.remove(paciente.IDPac)
+                        self.actualizar_numero_prios(paciente)
+                        print(f"{self.tActual}: Priorización aplicada {paciente.IDPac}")
+                        self.lista_prioridad.remove(paciente.IDPac)
+                       
                        
                    GeneralUrgente.enqueue(paciente)
                    print(f"{self.tActual}: {paciente.IDPac} en cola {paciente.consulta}/Urgente: {paciente.urgencia} EST:{paciente.tEstimado}")    
@@ -213,6 +217,7 @@ class Gestor_Turnos:
             elif paciente.consulta == "specialist":
                if paciente.urgencia or paciente.IDPac in self.lista_prioridad:
                    if paciente.IDPac in self.lista_prioridad:
+                       self.actualizar_numero_prios(paciente)
                        print(f"{self.tActual}: Priorización aplicada {paciente.IDPac}")
                        self.lista_prioridad.remove(paciente.IDPac)
                        
@@ -261,14 +266,14 @@ class Gestor_Turnos:
                 if (self.tActual - paciente.tiempos["tInicio_consulta"]) >= paciente.tEstimado:
                     paciente.tiempos["tFinal_consulta"] = self.tActual
                     paciente.tiempos["tTotal"] = (self.tActual - paciente.tiempos["tEntrada"])
-                    self.almacenamiento.append(paciente.__dict__.values())
+                    self.almacenamiento.append(paciente)
                     
                     if paciente.tiempos["tInicio_consulta"] - paciente.tiempos["tEntrada"] >= 7 :
                         a = consultas.pop(0)
                         print(f'{self.tActual}: {paciente.IDPac} sale {paciente.consulta}/Urgente: {paciente.urgencia} ADM:{paciente.tiempos['tEntrada']}, INI: {paciente.tiempos['tInicio_consulta']}, EST./TOTAL: {paciente.tiempos['tEstimado']}/{paciente.tiempos['tTotal']}')
                         print(f"{self.tActual}: Priorización activa {paciente.IDPac}")
                         self.lista_prioridad.append(a.IDPac)
-                        self.actualizar_numero_prios()
+                        
                         
                     else:
                         print(f"{self.tActual}: {paciente.IDPac} sale {paciente.consulta}/Urgente: {paciente.urgencia} ADM:{paciente.tiempos['tEntrada']}, INI: {paciente.tiempos['tInicio_consulta']}, EST./TOTAL: {paciente.tiempos['tEstimado']}/{paciente.tiempos['tTotal']}")
