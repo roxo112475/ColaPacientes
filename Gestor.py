@@ -149,41 +149,6 @@ class Gestor_Turnos:
         else:
             self._numero_prios["especialidad"] += 1
 
-
-#Carga los pacientes del txto todos a la vez
-    def cargar_pacientes(self) :
-        """
-        Lee un archivo .txt del que extrae los datos de los pacientes.
-
-        Return : 
-        --------
-            None
-        """
-
-        # Leer el archivo de configuración desde la línea de comandos o usar el predeterminado
-        config_file = sys.argv[1] if len(sys.argv) > 1 else "./patients0.txt"
-    
-        # Intentar abrir el archivo especificado
-        try:
-            with open(config_file, "r", encoding="utf-8") as f:
-                lines = [line.strip() for line in f if line.strip()]
-        except FileNotFoundError:
-            print(f"Error: El archivo '{config_file}' no existe.", file=sys.stderr)
-            sys.exit(1)
-        Admision.clear() #Así solo guarda en admision los pacientes dek txt y no se acumulan entre ejecuciones
-        
-        for i in range(len(lines)):
-            datos_paciente = lines[i].split()
-            IDPac = datos_paciente[0]
-            consulta = datos_paciente[1]
-            urgencia = datos_paciente[2].lower() == "true"
-            tEstimado = int(datos_paciente[3])
-            paciente = Paciente(IDPac, consulta, urgencia, tEstimado)
-            paciente.tiempos["tLlegada"] = self.tActual
-            Admision.enqueue(paciente)            
-
-        return None
-
     
     def distribuir_pacientes(self, Admision) :
         """
