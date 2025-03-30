@@ -1,3 +1,6 @@
+# García Iglesias, Nicolás - nicolas.garcia.iglesias@udc.es
+# Omil Barreiro, Manuel - manuel.omil.barreiro@udc.es
+
 class Paciente:
     """
     Inicializa a cada paciente.

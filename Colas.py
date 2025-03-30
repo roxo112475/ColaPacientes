@@ -1,4 +1,5 @@
-
+# García Iglesias, Nicolás - nicolas.garcia.iglesias@udc.es
+# Omil Barreiro, Manuel - manuel.omil.barreiro@udc.es
 
 class Empty(Exception):
     """Error attempting to access an element from an empty container."""

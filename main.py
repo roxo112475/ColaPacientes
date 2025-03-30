@@ -1,3 +1,6 @@
+# García Iglesias, Nicolás - nicolas.garcia.iglesias@udc.es
+# Omil Barreiro, Manuel - manuel.omil.barreiro@udc.es
+
 import sys
 import pandas as pd
 from gestor import Gestor_Turnos

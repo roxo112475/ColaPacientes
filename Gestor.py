@@ -1,3 +1,5 @@
+# García Iglesias, Nicolás - nicolas.garcia.iglesias@udc.es
+# Omil Barreiro, Manuel - manuel.omil.barreiro@udc.es
 
 from colas import GeneralNoUrgente, GeneralUrgente, EspecificoNoUrgente, EspecificoUrgente
 from clase_paciente import Paciente
