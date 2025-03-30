@@ -83,6 +83,7 @@ class Cola:
             
             
 
+#Creacion de las distintas colas del hospital
 GeneralUrgente = Cola()
 GeneralNoUrgente = Cola()
 EspecificoUrgente = Cola()

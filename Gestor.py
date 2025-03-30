@@ -1,8 +1,6 @@
 
-from Colas import Cola, GeneralNoUrgente, GeneralUrgente, EspecificoNoUrgente, EspecificoUrgente, Admision
+from colas import GeneralNoUrgente, GeneralUrgente, EspecificoNoUrgente, EspecificoUrgente
 from clase_paciente import Paciente
-import sys
-import pandas
 
 class Gestor_Turnos:
     """
@@ -32,7 +30,7 @@ class Gestor_Turnos:
     retirar_consulta(self, consultas_colas: dict) :
         Retira pacientes de la consulta y, si han esperado demasiado, los prioriza.
     """ 
-
+#Inicializacion de los parametros
     def __init__(self, tActual= 1) :
         """
         Inicializa el gestor de turnos con un tiempo actual y listas vacías.
@@ -54,6 +52,8 @@ class Gestor_Turnos:
         self._almacenamiento = []
         self._numero_prios = {"general": 0, "especialidad": 0}
         self._tiempoCola = {'ColaGeneralNoUrgente': [], 'ColaGeneralUrgente': [], 'ColaEspecíficaNoUrgente': [], 'ColaEspecíficaUrgente': []}
+
+#Properties y Setters
 
     @property
     def tiempoCola(self) :
@@ -131,6 +131,7 @@ class Gestor_Turnos:
             raise IndexError('El tiempo de espera no está siendo indexado en ninguna de las listas de registro.')
         return None
 
+
     def actualizar_tiempo(self) :
         """
         Actualiza el tiempo del hospital en una unidad.
@@ -142,6 +143,7 @@ class Gestor_Turnos:
 
         self._tActual += 1
         
+
     def actualizar_numero_prios(self, paciente:Paciente) :
         """Aumenta en 1 unidad el numero de priorizados totales."""
         if paciente.consulta == "general":
@@ -158,13 +160,16 @@ class Gestor_Turnos:
             None
         """
 
-        if self.tActual %  3 == 1 and not Admision.is_empty():
+        if self.tActual %  3 == 1 and not Admision.is_empty():  #Un paciente pasa a consulta cada 3 turnos empezando en el 1
 
             paciente = Admision.dequeue()
             paciente.tiempos["tEntrada"] = self.tActual
             
-            if paciente.consulta == "general":
+            #Caso paciente general:
+            if paciente.consulta == "general":  
                if paciente.urgencia or paciente.IDPac in self.lista_prioridad:
+                   
+                   #Subcaso de prioridad
                    if paciente.IDPac in self.lista_prioridad:
                         self.actualizar_numero_prios(paciente)
                         print(f"{self.tActual}: Priorización aplicada {paciente.IDPac}")
@@ -178,10 +183,12 @@ class Gestor_Turnos:
                    GeneralNoUrgente.enqueue(paciente)
                    print(f"{self.tActual}: {paciente.IDPac} en cola {paciente.consulta}/Urgente: {paciente.urgencia} EST:{paciente.tEstimado}")
                    
-                   
-            elif paciente.consulta == "specialist":
+            #Caso especialidad:       
+            elif paciente.consulta == "specialist":  
                if paciente.urgencia or paciente.IDPac in self.lista_prioridad:
                    if paciente.IDPac in self.lista_prioridad:
+                       
+                       #Subcaso de prioridad
                        self.actualizar_numero_prios(paciente)
                        print(f"{self.tActual}: Priorización aplicada {paciente.IDPac}")
                        self.lista_prioridad.remove(paciente.IDPac)
@@ -195,6 +202,7 @@ class Gestor_Turnos:
         return None
 
 
+
     def pasar_consulta(self, consultas_colas: dict) :
         """
         Pasa los pacientes a la consulta si estas están vacías.
@@ -203,8 +211,8 @@ class Gestor_Turnos:
         --------
             None
         """
-
-        for lista in consultas_colas.keys():
+        
+        for lista in consultas_colas.keys(): #Recorre el diccionario, en concreto cada cola y comprueba que la respectiva consulta este vacia antes de añadir un paciente
             if not lista.is_empty() and len(consultas_colas[lista]) == 0:
                 en_consulta = lista.dequeue()
                 en_consulta.tiempos["tInicio_consulta"] = self.tActual
@@ -226,13 +234,14 @@ class Gestor_Turnos:
 
         for consultas in consultas_colas.values() :
             if len(consultas) != 0 :
-                paciente = consultas[0]
+                paciente = consultas[0] #Consultas[0] ahora responde a la variable "paciente" (mas intuitivo)
 
                 if (self.tActual - paciente.tiempos["tInicio_consulta"]) >= paciente.tEstimado:
-                    paciente.tiempos["tFinal_consulta"] = self.tActual
+                    paciente.tiempos["tFinal_consulta"] = self.tActual #Añade tiempos
                     paciente.tiempos["tTotal"] = (self.tActual - paciente.tiempos["tEntrada"])
-                    self.almacenamiento.append(paciente)
-                    
+                    self.almacenamiento.append(paciente) #Almacena los datos del paciente para el pandas
+
+                    #Asignacion de prioridad:
                     if paciente.tiempos["tInicio_consulta"] - paciente.tiempos["tEntrada"] >= 7 :
                         a = consultas.pop(0)
                         print(f'{self.tActual}: {paciente.IDPac} sale {paciente.consulta}/Urgente: {paciente.urgencia} ADM:{paciente.tiempos['tEntrada']}, INI: {paciente.tiempos['tInicio_consulta']}, EST./TOTAL: {paciente.tiempos['tEstimado']}/{paciente.tiempos['tTotal']}')
